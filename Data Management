@@ -1,4 +1,5 @@
 import streamlit as st
+import sqlite3
 import pandas as pd
 import numpy as np
 from nba_api.stats.static import players, teams
@@ -131,19 +132,34 @@ def preprocess_game_log(game_log):
 
     return game_log
 
-def get_career_avg_vs_opponent(player_id, opponent_team_id):
-    game_logs = PlayerGameLog(player_id=player_id).get_data_frames()[0]
+def get_career_avg_vs_opponent(player_id, opponent_team_id, db_path):
+    """
+    Get the career average points of a player against a specific opponent.
     
-    # Filter games where the opponent matches the specified team
-    vs_opponent = game_logs[game_logs['MATCHUP'].str.contains(f'vs. {opponent_team_id}')]
+    :param player_id: The player's ID.
+    :param opponent_team_id: The opponent team's ID.
+    :param db_path: Path to the SQLite database.
+    :return: Average points scored against the opponent, or None if no data exists.
+    """
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
     
-    # Calculate averages for relevant stats
-    if not vs_opponent.empty:
-        career_avg = vs_opponent.mean(numeric_only=True)
-        return career_avg['PTS']  # Return average points
-    else:
-        return None  # No games found against the opponent
+    # Query to calculate the average points against the specific opponent
+    query = """
+    SELECT AVG(PTS) as avg_pts
+    FROM game_logs
+    WHERE player_id = ?
+      AND MATCHUP LIKE '%' || ? || '%'
+    """
     
+    cursor.execute(query, (player_id, opponent_team_id))
+    result = cursor.fetchone()
+    
+    conn.close()
+    
+    # Return the average points if it exists, otherwise None
+    return result[0] if result and result[0] is not None else None
+
 # Add this function definition above the main function
 def predict_with_model(model, game_log, target_col):
     features = game_log[['Rolling_Avg_PTS', 'Rolling_Avg_REB', 'Rolling_Avg_AST', 'MINUTES_PLAYED', 'FGM_PCT', 'FTM_PCT', 'FG3M_PCT']]
