@@ -19,3 +19,4 @@ pip install -r requirements.txt
 Open and execute the code using Sreamlit run app.py (Make sure to name the file of the code app.py) 
 
 
+Demo Video: https://drive.google.com/file/d/1S2up3XJe3iFmX3YuDXyrBmPhXrc5AIjT/view?usp=sharing
