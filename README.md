@@ -1,4 +1,5 @@
 NBA Analyzer
+
 This project aims to gather data and predict NBA box score for each player from every team. The different types of models will help team managers and coaches use statistics for team development.
 
 Setup Instructions
